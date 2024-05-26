@@ -2,27 +2,9 @@
 #include <string>
 #include <unordered_map>
 #include <queue>
+#include "../inc/node.h"
+
 using namespace std;
-
-//Nodo para la cola de prioridad 
-struct Node
-{
-    char ch;
-    int freq;
-    Node* left;
-    Node* right;
-
-
-    Node(char c, int f) : ch(c), freq(f),left(nullptr), right(nullptr){}
-};
-// Comparador personalizado para la cola de prioridad
-struct Compare 
-{
-    bool operator()(Node* left, Node* right) 
-    {
-        return left->freq > right->freq;
-    }
-};
 
 Node* HuffmanTree(std::unordered_map<char,int> &f)
 {
@@ -55,6 +37,24 @@ Node* HuffmanTree(std::unordered_map<char,int> &f)
     return queue.top();
 
 };
+// Creamos un mapa que asigna cada caracter a un codigo de Huffman
+void CreateCodes(Node* raiz, const string &code , std::unordered_map<char, string> &codes)
+{
+    // Caso base, si el arbol esta vacio, no hacemos nada
+    if(!raiz)
+    {
+        return;
+    }
+
+    //Estamos en una hoja, guardamos su caracter
+    if(!raiz->left && !raiz->right)
+    {
+        codes[raiz->ch] = code;
+    }
+
+    CreateCodes(raiz->left, code + "0", codes);
+    CreateCodes(raiz->right, code + "1", codes);
+}
 
 // Función que cuenta las veces que se repite cada caracter en string
 std::unordered_map<char,int> FrCount( std::unordered_map<char,int> f, std::string t ){
@@ -62,23 +62,56 @@ std::unordered_map<char,int> FrCount( std::unordered_map<char,int> f, std::strin
     {
         f[ch]++;
     }
+     std::cout << "Frecuencias de los caracteres:\n";
+    for (const auto& pair : f) {
+        std::cout << pair.first << ": " << pair.second << "\n";
+    }
     
     return f;
 }
 
-int main()
-{  
-    std::unordered_map<char,int> freq;
-
-
-    string text ="tangananica-tanganana";
+string CodingText (string &text, std::unordered_map<char,string> &codes) 
+{
+    string EncodedText;
+    for (auto c : text)
+    {
+        EncodedText +=codes.at(c);
+    }
     
+    return EncodedText;
+}
+
+string codificar(string text)
+{   
+    std::unordered_map<char,int> freq;
+    std::unordered_map<char,string> codes;
+    string encodeText;
+
+    //Calculamos la frecuencia;
     freq = FrCount(freq, text);
 
-    for (auto ch : freq)
-    {
-        cout<<"Caracter: "<< ch.first << " Frecuencia: "<<ch.second<<endl; 
+    //Con la frecuencia calculada, creamos el arbol
+    Node* root = HuffmanTree(freq);
+    
+    //Creamos la tabla de codificación que mapea entre posiciones.
+    CreateCodes(root,"",codes);
+    
+    //Y por ultimo devolvemos el texto codificado
+    std::cout << "Tabla de códigos de Huffman:\n";
+    for (const auto& pair : codes) {
+    std::cout << pair.first << ": " << pair.second << "\n";
     }
+    return encodeText= CodingText(text,codes);
+
+}
+
+int main()
+{  
+    string text ="tangananica-tanganana";
+    string encode;
+    encode = codificar(text);
+
+    cout<<encode;
     
     
 
