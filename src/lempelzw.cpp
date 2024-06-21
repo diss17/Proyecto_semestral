@@ -1,4 +1,9 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
+
 using namespace std;
 /*
 compresion: Esta función toma una cadena s1 como entrada y la comprime utilizando el algoritmo LempelZW.
@@ -13,12 +18,8 @@ Luego se imprime la tabla de compresión paso a paso y devuelve output_code,
 que contiene los códigos de salida comprimidos.
 */
 
-
-
-
-vector<int> compresion(string s1)
+vector<int> comprimir(string s1)
 {
-    cout << "Codificando\n";
     unordered_map<string, int> table;
     for (int i = 0; i <= 255; i++)
     {
@@ -31,7 +32,7 @@ vector<int> compresion(string s1)
     p += s1[0];
     int code = 256;
     vector<int> output_code;
-    cout << "String\tOutput_Code\tAddition\n";
+
     for (int i = 0; i < s1.length(); i++)
     {
         if (i != s1.length() - 1)
@@ -42,8 +43,6 @@ vector<int> compresion(string s1)
         }
         else
         {
-            cout << p << "\t" << table[p] << "\t\t"
-                 << p + c << "\t" << code << endl;
             output_code.push_back(table[p]);
             table[p + c] = code;
             code++;
@@ -51,7 +50,6 @@ vector<int> compresion(string s1)
         }
         c = "";
     }
-    cout << p << "\t" << table[p] << endl;
     output_code.push_back(table[p]);
     return output_code;
 }
@@ -65,9 +63,8 @@ Si no está presente, se construye la cadena s + c, donde c es el primer caráct
 Se imprime la cadena s y se actualizan las variables c, count y old.
 Luego se imprime la cadena descomprimida paso a paso.
 */
-void descompresion(vector<int> op)
+string descomprimir(vector<int> op)
 {
-    cout << "\nDecoding\n";
     unordered_map<int, string> table;
     for (int i = 0; i <= 255; i++)
     {
@@ -75,12 +72,14 @@ void descompresion(vector<int> op)
         ch += char(i);
         table[i] = ch;
     }
+
     int old = op[0], n;
     string s = table[old];
     string c = "";
     c += s[0];
-    cout << s;
+    string result = s;
     int count = 256;
+
     for (int i = 0; i < op.size() - 1; i++)
     {
         n = op[i + 1];
@@ -93,25 +92,92 @@ void descompresion(vector<int> op)
         {
             s = table[n];
         }
-        cout << s;
+        result += s;
         c = "";
         c += s[0];
         table[count] = table[old] + c;
         count++;
         old = n;
     }
+
+    return result;
 }
 
-
-int main()
+int main(int argc, char *argv[])
 {
-    string text = "tangananica-tanganana";
-    vector<int> output_code = compresion(text);
-    cout << "Output Codes are: ";
-    for (int i = 0; i < output_code.size(); i++)
+    if (argc != 4)
     {
-        cout << output_code[i] << " ";
+        cout << "Uso: " << argv[0] << " <comprimir/descomprimir> <archivo_entrada> <archivo_salida>\n";
+        return 1;
     }
-    cout << endl;
-    descompresion(output_code);
+
+    string modo = argv[1];
+    string archivo_entrada = argv[2];
+    string archivo_salida = argv[3];
+
+    ifstream infile(archivo_entrada);
+    if (!infile)
+    {
+        cerr << "Error al abrir el archivo de entrada.\n";
+        return 1;
+    }
+
+    stringstream buffer;
+    buffer << infile.rdbuf();
+    string texto = buffer.str();
+    infile.close();
+
+    vector<int> codigos;
+
+    if (modo == "comprimir")
+    {
+        codigos = comprimir(texto);
+
+        ofstream outfile(archivo_salida);
+        if (!outfile)
+        {
+            cerr << "Error al abrir el archivo de salida.\n";
+            return 1;
+        }
+
+        for (int codigo : codigos)
+        {
+            outfile << codigo << " ";
+        }
+        outfile.close();
+
+        cout << "Archivo comprimido exitosamente.\n";
+    }
+    else if (modo == "descomprimir")
+    {
+        vector<int> codigos_descomprimir;
+        int codigo;
+        ifstream infile2(archivo_entrada);
+        while (infile2 >> codigo)
+        {
+            codigos_descomprimir.push_back(codigo);
+        }
+        infile2.close();
+
+        string texto_descomprimido = descomprimir(codigos_descomprimir);
+
+        ofstream outfile(archivo_salida);
+        if (!outfile)
+        {
+            cerr << "Error al abrir el archivo de salida.\n";
+            return 1;
+        }
+
+        outfile << texto_descomprimido;
+        outfile.close();
+
+        cout << "Archivo descomprimido exitosamente.\n";
+    }
+    else
+    {
+        cout << "Modo no válido. Debe ser 'comprimir' o 'descomprimir'.\n";
+        return 1;
+    }
+
+    return 0;
 }
