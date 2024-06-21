@@ -3,6 +3,7 @@
 #include <queue>
 #include <unordered_map>
 #include <fstream>
+#include <chrono>
 
 using namespace std;
 /* Estructura Node: Define un nodo del árbol de Huffman, 
@@ -215,7 +216,9 @@ int main(int argc, char const *argv[])
 
     if (mode == "comprimir")
     {
+        //medir tiempo inicio
         crear_arbol(input_file_path, output_file_path);
+        //medir tiempo final
     }
     else if (mode == "descomprimir")
     {
