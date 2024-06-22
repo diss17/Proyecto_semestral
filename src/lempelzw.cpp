@@ -3,7 +3,8 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-
+#include <chrono> // Biblioteca para medir el tiempo
+#include <string>
 using namespace std;
 /*
 compresion: Esta función toma una cadena s1 como entrada y la comprime utilizando el algoritmo LempelZW.
@@ -131,14 +132,32 @@ int main(int argc, char *argv[])
 
     if (modo == "comprimir")
     {
-        codigos = comprimir(texto);
-
+        
+        
         ofstream outfile(archivo_salida);
         if (!outfile)
         {
             cerr << "Error al abrir el archivo de salida.\n";
             return 1;
         }
+        // Archivo para guardar los tiempos de compresión
+        ofstream timefile("resultados_tiempos_compresion.txt");
+        if (!timefile)
+        {
+            cerr << "Error al abrir el archivo de resultados de tiempos.\n";
+            return 1;
+        }
+        for (int i = 0; i < 20; ++i){
+            auto start_time = chrono::high_resolution_clock::now(); // Medir tiempo inicio
+            codigos = comprimir(texto);
+            auto end_time = chrono::high_resolution_clock::now(); // Medir tiempo final
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+            timefile << "Iteración " << (i + 1) << ": " << duration << " milisegundos" << endl;
+
+            // Limpieza de la memoria de los códigos
+            codigos.clear();
+        }
+        timefile.close();
 
         for (int codigo : codigos)
         {
@@ -148,6 +167,7 @@ int main(int argc, char *argv[])
 
         cout << "Archivo comprimido exitosamente.\n";
     }
+
     else if (modo == "descomprimir")
     {
         vector<int> codigos_descomprimir;
@@ -159,8 +179,14 @@ int main(int argc, char *argv[])
         }
         infile2.close();
 
-        string texto_descomprimido = descomprimir(codigos_descomprimir);
+      
 
+        ofstream timefile("resultados_tiempos_descompresion.txt");
+        if (!timefile)
+        {
+            cerr << "Error al abrir el archivo de resultados de tiempos.\n";
+            return 1;
+        }
         ofstream outfile(archivo_salida);
         if (!outfile)
         {
@@ -168,7 +194,30 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        outfile << texto_descomprimido;
+        for (int i = 0; i < 20; ++i)
+        {
+            auto start_time = chrono::high_resolution_clock::now(); // Medir tiempo inicio
+
+            string texto_descomprimido = descomprimir(codigos_descomprimir);
+
+            auto end_time = chrono::high_resolution_clock::now(); // Medir tiempo final
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+            timefile << "Iteración " << (i + 1) << ": " << duration << " milisegundos" << endl;
+
+            // Limpieza de la memoria del texto descomprimido
+            texto_descomprimido.clear();
+        }
+         // Realizar la descompresión una vez más y escribir en el archivo de salida
+        string texto_descomprimido_final = descomprimir(codigos_descomprimir);
+        ofstream outfile(archivo_salida);
+        if (!outfile)
+        {
+            cerr << "Error al abrir el archivo de salida.\n";
+            return 1;
+        }
+
+        timefile.close();
+        outfile << texto_descomprimido_final;
         outfile.close();
 
         cout << "Archivo descomprimido exitosamente.\n";
@@ -181,3 +230,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
