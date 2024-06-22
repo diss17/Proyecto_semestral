@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <chrono>
+#include <vector> 
 
 using namespace std;
 /* Estructura Node: Define un nodo del árbol de Huffman, 
@@ -206,7 +207,7 @@ int main(int argc, char const *argv[])
 {
     if (argc != 4)
     {
-        cerr << "Uso: " << argv[0] << " <comprimir/descomprimir> <archivo_entrada> <archivo_salida>" << endl;
+        cerr << "Uso: " << argv[0] << " <comprimir/descomprimir> <archivo_entrada> <archivo_salida> <num_iteraciones>" << endl;
         return 1;
     }
 
@@ -214,19 +215,43 @@ int main(int argc, char const *argv[])
     string input_file_path = argv[2];
     string output_file_path = argv[3];
 
+    vector<double> tiempos;
+
     if (mode == "comprimir")
     {
-        //medir tiempo inicio
-        crear_arbol(input_file_path, output_file_path);
-        //medir tiempo final
+        for (int i = 0; i < 20; ++i) {
+            auto start = chrono::high_resolution_clock::now();
+            crear_arbol(input_file_path, output_file_path);
+            auto end = chrono::high_resolution_clock::now();
+            chrono::duration<double> elapsed = end - start;
+            tiempos.push_back(elapsed.count());
+        }
     }
     else if (mode == "descomprimir")
     {
-        descomprimir(input_file_path, output_file_path);
+        for (int i = 0; i < 20; ++i) {
+            auto start = chrono::high_resolution_clock::now();
+            descomprimir(input_file_path, output_file_path);
+            auto end = chrono::high_resolution_clock::now();
+            chrono::duration<double> elapsed = end - start;
+            tiempos.push_back(elapsed.count());
+        }
     }
     else
     {
         cerr << "Modo desconocido: " << mode << endl;
+        return 1;
+    }
+
+    // Guardar los tiempos en un archivo de salida
+    ofstream output_file("tiempos_medidos.csv");
+    if (output_file.is_open()) {
+        for (const auto& tiempo : tiempos) {
+            output_file << tiempo << endl;
+        }
+        output_file.close();
+    } else {
+        cerr << "No se pudo abrir el archivo de salida." << endl;
         return 1;
     }
 

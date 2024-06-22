@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         // Archivo para guardar los tiempos de compresión
-        ofstream timefile("resultados_tiempos_compresion.txt");
+        ofstream timefile("resultados_tiempos_compresion.csv");
         if (!timefile)
         {
             cerr << "Error al abrir el archivo de resultados de tiempos.\n";
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
       
 
-        ofstream timefile("resultados_tiempos_descompresion.txt");
+        ofstream timefile("resultados_tiempos_descompresion.csv");
         if (!timefile)
         {
             cerr << "Error al abrir el archivo de resultados de tiempos.\n";
