@@ -2,6 +2,12 @@
 #include <string>
 #include <queue>
 #include <unordered_map>
+<<<<<<< Updated upstream
+=======
+#include <fstream>
+#include <chrono>
+#include <bitset>
+>>>>>>> Stashed changes
 
 using namespace std;
 
@@ -133,6 +139,7 @@ void crear_arbol(string text)
     {
         str += CodigoHuffman[simbolo];
     }
+<<<<<<< Updated upstream
     cout << "\n El texto codificado es: \n"
          << str << endl;
     int index = -1;
@@ -142,6 +149,46 @@ void crear_arbol(string text)
         decodificar(raiz, index, str);
     }
     cout << "\n\n\n";
+=======
+
+    // Guardar códigos de Huffman y el texto codificado en el archivo de salida
+    output_file << CodigoHuffman.size() << endl;
+    int sizet = 0;
+    std::string ConvertiraBinario;
+    for (auto pair : CodigoHuffman)
+    {
+        output_file << pair.first << " " << pair.second << endl;
+        ConvertiraBinario.append(pair.second);
+
+    } 
+    ConvertiraBinario+=str;
+    // inicio Prueba para convertir en Archivo binario.
+    if (ConvertiraBinario.size() % 8 != 0)
+    {
+        size_t length = ConvertiraBinario.length();
+        size_t padding = (8 - (length % 8)) % 8;  // Calcular el relleno necesario
+        
+        ConvertiraBinario = std::string(padding, '0') + ConvertiraBinario;
+    }
+    
+     // Convertir la cadena binaria a bytes
+    std::vector<unsigned char> byte_array;
+    for (size_t i = 0; i < ConvertiraBinario.length(); i += 8) {
+        std::bitset<8> byte(ConvertiraBinario.substr(i, 8));
+        byte_array.push_back(static_cast<unsigned char>(byte.to_ulong()));
+    }
+    std::ofstream output1("funcionar.bin", std::ios::binary);
+    if (!output1) {
+        std::cerr << "No se pudo abrir el archivo para escribir." << std::endl;
+    }
+    output1.write(reinterpret_cast<const char*>(byte_array.data()), byte_array.size());
+    output1.close();
+
+    std::cout << "Archivo guardado correctamente." << std::endl;
+
+    output_file << str;
+    output_file.close();
+>>>>>>> Stashed changes
 }
 
 
