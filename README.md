@@ -23,7 +23,7 @@ Codificar vs Comprimir.
     .\huffman <codificar/decodificar> <archivo de entrada> <archivo de salida>
     ```
 
-### Compilación y Ejecución con Algoritmo de Lempel-Ziv
+### Compilación y Ejecución con algoritmo de Lempel-Ziv
 1. Compilar el archivo `lempelzw.cpp`:
     ```sh
     g++ lempelzw.cpp -o lempel
