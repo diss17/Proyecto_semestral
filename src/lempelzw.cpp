@@ -7,9 +7,22 @@
 #include <string>
 using namespace std;
 
+/**
+ * @brief Comprime una cadena utilizando el algoritmo de compresión LZW.
+ *
+ * Esta función implementa el algoritmo de compresión LZW (Lempel-Ziv-Welch). Inicialmente, la tabla de códigos contiene
+ * las entradas para todos los caracteres ASCII (0-255). La función construye progresivamente nuevas entradas en la tabla
+ * para subsecuencias de caracteres encontradas en la cadena de entrada y devuelve una secuencia de códigos de salida.
+ *
+ * @param s1 La cadena de entrada que se va a comprimir.
+ * @return vector<int> Un vector de enteros que representa la cadena de entrada comprimida.
+ */
 vector<int> comprimir(string s1)
 {
+    // Tabla de códigos para almacenar las subsecuencias y sus respectivos códigos
     unordered_map<string, int> table;
+    
+    // Inicializa la tabla con los caracteres ASCII
     for (int i = 0; i <= 255; i++)
     {
         string ch = "";
@@ -17,35 +30,57 @@ vector<int> comprimir(string s1)
         table[ch] = i;
     }
 
+    // Variables para almacenar la subsecuencia actual y la siguiente
     string p = "", c = "";
-    p += s1[0];
-    int code = 256;
-    vector<int> output_code;
+    p += s1[0]; // Inicializa 'p' con el primer carácter de la cadena de entrada
+    int code = 256; // Código inicial para nuevas entradas en la tabla (códigos 0-255 ya están usados)
+    vector<int> output_code; // Vector para almacenar los códigos de salida
 
+    // Recorre la cadena de entrada carácter por carácter
     for (int i = 0; i < s1.length(); i++)
     {
         if (i != s1.length() - 1)
-            c += s1[i + 1];
+            c += s1[i + 1]; // 'c' obtiene el siguiente carácter si no es el final de la cadena
+
+        // Si la combinación de 'p' y 'c' ya existe en la tabla
         if (table.find(p + c) != table.end())
         {
-            p = p + c;
+            p = p + c; // Extiende 'p' para incluir 'c'
         }
         else
         {
+            // Si 'p + c' no está en la tabla, añade el código de 'p' a la salida
             output_code.push_back(table[p]);
+            // Añade 'p + c' a la tabla con un nuevo código
             table[p + c] = code;
             code++;
+            // 'p' ahora se convierte en 'c'
             p = c;
         }
+        // Resetea 'c' para el siguiente carácter
         c = "";
     }
+    // Añade el código de la última subsecuencia a la salida
     output_code.push_back(table[p]);
-    return output_code;
+    return output_code; // Devuelve el vector de códigos de salida
 }
 
+/**
+ * @brief Descomprime una secuencia de códigos utilizando el algoritmo LZW.
+ *
+ * Esta función implementa el algoritmo de descompresión LZW (Lempel-Ziv-Welch). Inicialmente, la tabla de códigos contiene
+ * las entradas para todos los caracteres ASCII (0-255). La función reconstruye progresivamente las subsecuencias de caracteres
+ * a partir de la secuencia de códigos de entrada y devuelve la cadena descomprimida.
+ *
+ * @param op Un vector de enteros que representa la secuencia de códigos comprimidos.
+ * @return string La cadena de texto descomprimida.
+ */
 string descomprimir(vector<int> op)
 {
+    // Tabla de códigos para almacenar los códigos y sus respectivas subsecuencias
     unordered_map<int, string> table;
+    
+    // Inicializa la tabla con los caracteres ASCII
     for (int i = 0; i <= 255; i++)
     {
         string ch = "";
@@ -53,16 +88,18 @@ string descomprimir(vector<int> op)
         table[i] = ch;
     }
 
-    int old = op[0], n;
-    string s = table[old];
-    string c = "";
+    int old = op[0], n; // Código anterior y el código actual
+    string s = table[old]; // Cadena correspondiente al código anterior
+    string c = ""; // Primer carácter de la cadena actual
     c += s[0];
-    string result = s;
-    int count = 256;
+    string result = s; // Resultado de la descompresión
+    int count = 256; // Código inicial para nuevas entradas en la tabla (códigos 0-255 ya están usados)
 
+    // Recorre la secuencia de códigos de entrada
     for (int i = 1; i < op.size(); i++)
     {
-        n = op[i];
+        n = op[i]; // Código actual
+        // Si el código no está en la tabla, construye la cadena manualmente
         if (table.find(n) == table.end())
         {
             s = table[old];
@@ -70,18 +107,20 @@ string descomprimir(vector<int> op)
         }
         else
         {
-            s = table[n];
+            s = table[n]; // Recupera la cadena correspondiente al código actual
         }
-        result += s;
+        result += s; // Añade la cadena al resultado
         c = "";
-        c += s[0];
+        c += s[0]; // Actualiza 'c' con el primer carácter de la cadena actual
+        // Añade la nueva entrada a la tabla
         table[count] = table[old] + c;
         count++;
-        old = n;
+        old = n; // Actualiza el código anterior
     }
 
-    return result;
+    return result; // Devuelve la cadena descomprimida
 }
+
 
 int main(int argc, char *argv[])
 {
