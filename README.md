@@ -36,3 +36,6 @@ Codificar vs Comprimir.
     ```sh
     .\lempel <comprimir/descomprimir> <archivo de entrada> <archivo de salida>
     ```
+### Pruebas experimentales
+Por temas de espacio, si se desea testear los algoritmos se recomienda el siguiente link para obtener archivos de texto con cuales trabajar.
+`https://pizzachili.dcc.uchile.cl/texts.html`
