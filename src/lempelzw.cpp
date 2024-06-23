@@ -3,7 +3,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include <chrono> // Biblioteca para medir el tiempo
+#include <chrono>
 #include <string>
 using namespace std;
 
@@ -60,9 +60,9 @@ string descomprimir(vector<int> op)
     string result = s;
     int count = 256;
 
-    for (int i = 0; i < op.size() - 1; i++)
+    for (int i = 1; i < op.size(); i++)
     {
-        n = op[i + 1];
+        n = op[i];
         if (table.find(n) == table.end())
         {
             s = table[old];
@@ -118,19 +118,26 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        // Archivo para guardar los tiempos de compresión
-        ofstream timefile("resultados_tiempos_compresion.csv");
+        ofstream timefile("resultados_tiempos_compresion.csv", ios::app);
         if (!timefile)
         {
             cerr << "Error al abrir el archivo de resultados de tiempos.\n";
             return 1;
         }
 
-        auto start_time = chrono::high_resolution_clock::now(); // Medir tiempo inicio
-        codigos = comprimir(texto);
-        auto end_time = chrono::high_resolution_clock::now(); // Medir tiempo final
-        auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
-        timefile << archivo_entrada << ";" << "iteracion1" << ";" << duration << ";" << "milisegundos" << endl;
+        for (int i = 0; i < 5; i++)
+        {
+            auto start_time = chrono::high_resolution_clock::now(); // Medir tiempo inicio
+            codigos = comprimir(texto);
+            auto end_time = chrono::high_resolution_clock::now(); // Medir tiempo final
+            auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+
+            // Calcular el tamaño del archivo comprimido en bytes
+            size_t compressed_size = codigos.size() * sizeof(codigos[0]);
+
+            // Escribir información en el archivo CSV
+            timefile << archivo_entrada << ";" << "iteracion" << (i + 1) << ";" << duration << ";" << "milisegundos" << ";" << compressed_size << " bytes" << endl;
+        }
 
         for (size_t i = 0; i < codigos.size(); ++i)
         {
@@ -154,13 +161,13 @@ int main(int argc, char *argv[])
         }
         infile2.close();
 
-        ofstream timefile("resultados_tiempos_descompresion.csv");
+        ofstream timefile("resultados_tiempos_descompresion.csv",ios::app);
         if (!timefile)
         {
             cerr << "Error al abrir el archivo de resultados de tiempos.\n";
             return 1;
         }
-        ofstream outfile(archivo_salida);
+        ofstream outfile(archivo_salida, ios::binary);
         if (!outfile)
         {
             cerr << "Error al abrir el archivo de salida.\n";
@@ -180,10 +187,11 @@ int main(int argc, char *argv[])
             // Limpieza de la memoria del texto descomprimido
             texto_descomprimido.clear();
         }
+
         // Realizar la descompresión una vez más y escribir en el archivo de salida
         string texto_descomprimido_final = descomprimir(codigos_descomprimir);
         timefile.close();
-        outfile << texto_descomprimido_final;
+        outfile.write(texto_descomprimido_final.c_str(), texto_descomprimido_final.size());
         outfile.close();
 
         cout << "Archivo descomprimido exitosamente.\n";
